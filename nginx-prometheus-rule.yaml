@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nginx-prometheus-rule
+  namespace: monitoring
+  labels:
+    prometheus: k8s 
+    role: alert-rules 
+    app.kubernetes.io/name: kube-prometheus 
+    app.kubernetes.io/part-of: kube-prometheus
+spec:
+  groups: 
+  - name: nginx-prometheus-rule
+    rules:
+    - alert: NginxHighRequestRate
+      annotations:
+        description: 'Nginx is receiving high request rate for more than 1 minute.
+          Pod name: {{ $labels.pod }}'
+        summary: Nginx is receiving high request rate
+      expr: rate(nginx_http_requests_total{job="default/nginx-podmonitor"}[5m]) > 17
+      for: 1m
+      labels:
+        severity: warning
